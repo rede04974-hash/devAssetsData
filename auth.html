@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tile Puzzle - Login</title>
+    <style>
+        /* ── reset & base ── */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        /* ── app container ── */
+        .app-container {
+            width: 100%;
+            max-width: 400px;
+            min-height: 100vh;
+            background-color: #ffffff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 24px;
+            position: relative;
+            overflow-y: auto;
+            will-change: transform;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        /* slide-out state – the container moves completely to the left */
+        .app-container.slide-out {
+            transform: translateX(-100%);
+            pointer-events: none;
+        }
+
+        /* ── top section ── */
+        .top-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+            margin-bottom: 24px;
+        }
+
+        .app-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1px;
+            flex-shrink: 0;
+        }
+
+        .app-icon img {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: 0.75px;
+            margin-bottom: 25px;
+            line-height: 1.15;
+        }
+
+        .welcome-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+
+        .subtitle-text {
+            font-size: 15px;
+            color: #64748b;
+            line-height: 1.5;
+            max-width: 280px;
+            font-weight: 400;
+            letter-spacing: 0.2px;
+        }
+
+        /* ── banner ── */
+        .banner-container {
+            width: 88%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 0px px rgba(0, 0, 0, 0.06);
+        }
+
+        .banner-container img {
+            width: 100%;
+            height: auto;
+        }
+
+        .app-icon img,
+        .banner-container img {
+            object-fit: contain;
+            display: block;
+        }
+
+        /* ── Google button ── */
+        .btn-google {
+            width: 100%;
+            height: 56px;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: background-color 0.25s ease, transform 0.20s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-google::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(37, 99, 235, 0.04) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .btn-google:hover::after {
+            opacity: 1;
+        }
+
+        .btn-google:hover {
+            border-color: #b9c7da;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+            background-color: #fafcff;
+        }
+
+        .btn-google:active {
+            transform: scale(0.97);
+            background-color: #f1f5f9;
+            border-color: #b9c7da;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+            transition-duration: 0.08s;
+        }
+
+        .google-icon {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+
+        .btn-google span {
+            line-height: 1.2;
+        }
+
+        .btn-google:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ── bottom info ── */
+        .bottom-info {
+            margin-top: auto;
+            text-align: center;
+            font-size: 12.5px;
+            color: #94a3b8;
+            line-height: 1.6;
+            letter-spacing: 0.2px;
+            padding-top: 8px;
+        }
+
+        /* ── success overlay ── */
+        .success-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.50s cubic-bezier(0.22, 1, 0.30, 1);
+            padding: 24px;
+            text-align: center;
+            border-radius: 0;
+        }
+
+        .success-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .success-icon {
+            width: 72px;
+            height: 72px;
+            background: #10b981;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.32);
+            transform: scale(0.70) rotate(-6deg);
+            transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.45s ease;
+        }
+
+        .success-overlay.active .success-icon {
+            transform: scale(1) rotate(0deg);
+            box-shadow: 0 14px 38px rgba(16, 185, 129, 0.35);
+        }
+
+        .success-icon svg {
+            width: 34px;
+            height: 34px;
+            stroke: currentColor;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .success-title,
+        .success-desc {
+            transform: translateY(12px);
+            opacity: 0;
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 6px;
+            letter-spacing: -0.4px;
+            transition: transform 0.50s ease 0.12s, opacity 0.45s ease 0.12s;
+        }
+
+        .success-desc {
+            font-size: 15px;
+            color: #64748b;
+            letter-spacing: 0.2px;
+            line-height: 1.5;
+            transition: transform 0.50s ease 0.20s, opacity 0.45s ease 0.20s;
+        }
+
+        .success-overlay.active .success-title,
+        .success-overlay.active .success-desc {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* ── error message ── */
+        .error-message {
+            color: #ef4444;
+            font-size: 13px;
+            text-align: center;
+            margin-top: -18px;
+            margin-bottom: 12px;
+            min-height: 20px;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .error-message.visible {
+            opacity: 1;
+        }
+
+        /* ── responsive tweaks ── */
+        @media (max-width: 420px) {
+            .app-container {
+                padding: 28px 18px;
+            }
+            .app-title {
+                font-size: 24px;
+            }
+            .welcome-text {
+                font-size: 18px;
+            }
+            .subtitle-text {
+                font-size: 14px;
+                max-width: 240px;
+            }
+            .btn-google {
+                height: 50px;
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .app-container {
+                padding: 20px 14px;
+            }
+            .app-title {
+                font-size: 20px;
+            }
+            .welcome-text {
+                font-size: 16px;
+            }
+            .subtitle-text {
+                font-size: 13px;
+            }
+            .btn-google {
+                height: 46px;
+                font-size: 14px;
+                gap: 10px;
+            }
+            .google-icon {
+                width: 18px;
+                height: 18px;
+            }
+        }
+
+        @media (min-height: 700px),
+        (min-width: 401px) {
+            .app-container {
+                min-height: auto;
+                border-radius: 28px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.10);
+            }
+        }
+
+        @media (min-height: 700px) {
+            .app-container {
+                padding-top: 48px;
+                padding-bottom: 48px;
+                margin: 20px;
+            }
+        }
+
+        @media (min-width: 401px) {
+            .app-container {
+                margin: 24px;
+            }
+            .success-overlay {
+                border-radius: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+
+        <div class="top-section">
+            <div class="app-icon">
+                <img src="app_icon.png" alt="Tile Puzzle" />
+            </div>
+            <h1 class="app-title">Tile Puzzle</h1>
+            <h2 class="welcome-text">Welcome</h2>
+            <p class="subtitle-text">Securely continue using your Google Account.</p>
+        </div>
+
+        <div class="banner-container">
+            <img src="banner.png" alt="Banner" />
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <button class="btn-google" id="googleBtn">
+            <svg class="google-icon" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span>Continue with Google</span>
+        </button>
+
+        <div class="bottom-info">
+            Only your Google account is used for secure authentication.<br />
+            We never ask for your password.
+        </div>
+
+        <div class="success-overlay" id="successOverlay">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+            <div class="success-title" id="successTitle">Welcome!</div>
+            <div class="success-desc" id="successDesc">Authentication successful.</div>
+        </div>
+
+    </div>
+
+    <!-- ─── Firebase Modular SDK via importmap ─── -->
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js",
+                "firebase/auth": "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js",
+                "firebase/firestore": "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js",
+                "firebase/analytics": "https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        // ──────────────────────────────────────────────────────────────
+        // 1. IMPORTS – Firebase Modular SDK (v10+)
+        // ──────────────────────────────────────────────────────────────
+        import { initializeApp } from "firebase/app";
+        import { getAnalytics } from "firebase/analytics";
+        import {
+            getAuth,
+            signInWithPopup,
+            GoogleAuthProvider,
+            onAuthStateChanged
+        } from "firebase/auth";
+        import {
+            getFirestore,
+            doc,
+            getDoc,
+            setDoc,
+            updateDoc
+        } from "firebase/firestore";
+
+        // ──────────────────────────────────────────────────────────────
+        // 2. FIREBASE CONFIG (provided by developer)
+        // ──────────────────────────────────────────────────────────────
+        const firebaseConfig = {
+            apiKey: "AIzaSyAStbQknETVE5pdnH2l2cDJdlOqeZ5kd8U",
+            authDomain: "mp-store-af4df.firebaseapp.com",
+            databaseURL: "https://mp-store-af4df-default-rtdb.firebaseio.com",
+            projectId: "mp-store-af4df",
+            storageBucket: "mp-store-af4df.firebasestorage.app",
+            messagingSenderId: "718382785279",
+            appId: "1:718382785279:web:2a03080bbf6b1c240722ca",
+            measurementId: "G-44D9N22S4N"
+        };
+
+        // ── Initialize Firebase ──
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // ──────────────────────────────────────────────────────────────
+        // 3. DOM REFERENCES
+        // ──────────────────────────────────────────────────────────────
+        const googleBtn = document.getElementById('googleBtn');
+        const successOverlay = document.getElementById('successOverlay');
+        const successTitle = document.getElementById('successTitle');
+        const successDesc = document.getElementById('successDesc');
+        const errorMessage = document.getElementById('errorMessage');
+        const appContainer = document.querySelector('.app-container');
+
+        // ──────────────────────────────────────────────────────────────
+        // 4. HELPERS
+        // ──────────────────────────────────────────────────────────────
+        const LS_KEY = 'tilePuzzleUser';
+        let isTransitioning = false;
+
+        /** Show a user-friendly error message (auto-dismiss after 5s) */
+        function showError(msg) {
+            errorMessage.textContent = msg;
+            errorMessage.classList.add('visible');
+            clearTimeout(window._errorTimer);
+            window._errorTimer = setTimeout(() => {
+                errorMessage.classList.remove('visible');
+            }, 5000);
+        }
+
+        function clearError() {
+            errorMessage.textContent = '';
+            errorMessage.classList.remove('visible');
+            clearTimeout(window._errorTimer);
+        }
+
+        /** Toggle loading state on the Google button */
+        function setLoading(state) {
+            googleBtn.disabled = state;
+            const span = googleBtn.querySelector('span');
+            span.textContent = state ? 'Signing in…' : 'Continue with Google';
+        }
+
+        /** Show the success overlay with a custom message */
+        function showSuccess(title, desc) {
+            successTitle.textContent = title;
+            successDesc.textContent = desc;
+            successOverlay.classList.add('active');
+        }
+
+        /** Format a Date object as 'YYYY-MM-DD' */
+        function formatDate(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        /** Format a Date object as 'HH:MM:SS' (24-hour) */
+        function formatTime(date) {
+            const h = String(date.getHours()).padStart(2, '0');
+            const m = String(date.getMinutes()).padStart(2, '0');
+            const s = String(date.getSeconds()).padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+
+        /** Get current date and time as separate formatted strings */
+        function getCurrentDateAndTime() {
+            const now = new Date();
+            return {
+                date: formatDate(now),
+                time: formatTime(now)
+            };
+        }
+
+        /** Save user data to Local Storage (only the allowed subset) */
+        function saveToLocalStorage(data) {
+            try {
+                // Ensure we only store the allowed fields
+                const cleanData = {
+                    uid: data.uid || '',
+                    displayName: data.displayName || '',
+                    email: data.email || '',
+                    photoURL: data.photoURL || '',
+                    coin: typeof data.coin === 'number' ? data.coin : 0,
+                    createdDate: data.createdDate || '',
+                    createdTime: data.createdTime || ''
+                };
+                localStorage.setItem(LS_KEY, JSON.stringify(cleanData));
+            } catch (_) {
+                // Storage full or unavailable – silently ignore
+            }
+        }
+
+        /** Read user data from Local Storage (returns null if missing/invalid) */
+        function readFromLocalStorage() {
+            try {
+                const raw = localStorage.getItem(LS_KEY);
+                if (!raw) return null;
+                return JSON.parse(raw);
+            } catch (_) {
+                return null;
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 5. CORE BUSINESS LOGIC (Cloud Firestore – sync + coin update)
+        // ──────────────────────────────────────────────────────────────
+
+        /**
+         * Handles coin synchronization between Local Storage and Firestore.
+         * - Reads Firestore document and Local Storage.
+         * - If coins differ, updates Firestore with local coin and timestamps.
+         * - Always overwrites Local Storage with Firestore data (excluding coinUpdatedDate/Time).
+         */
+        async function syncCoins(userDocRef, firestoreData, localData) {
+            const now = getCurrentDateAndTime();
+
+            // Safely extract coin values, defaulting to 0
+            const firestoreCoin = typeof firestoreData.coin === 'number' ? firestoreData.coin : 0;
+            const localCoin = (localData && typeof localData.coin === 'number') ? localData.coin : 0;
+
+            // If coins are different, update Firestore with local coin
+            if (firestoreCoin !== localCoin) {
+                console.log(`🔄 Syncing coins: Firestore=${firestoreCoin}, Local=${localCoin} → updating Firestore`);
+
+                const updatePayload = {
+                    coin: localCoin,
+                    coinUpdatedDate: now.date,
+                    coinUpdatedTime: now.time
+                };
+
+                try {
+                    await updateDoc(userDocRef, updatePayload);
+
+                    // After successful update, read the latest Firestore data
+                    const updatedDoc = await getDoc(userDocRef);
+                    if (updatedDoc.exists()) {
+                        const latestData = updatedDoc.data();
+                        // Save to Local Storage (excluding coinUpdatedDate/Time)
+                        saveToLocalStorage({
+                            uid: latestData.uid,
+                            displayName: latestData.displayName,
+                            email: latestData.email,
+                            photoURL: latestData.photoURL,
+                            coin: latestData.coin,
+                            createdDate: latestData.createdDate,
+                            createdTime: latestData.createdTime
+                        });
+                        console.log('✅ Firestore updated, Local Storage refreshed.');
+                    } else {
+                        console.warn('⚠️ Document disappeared after update.');
+                    }
+                } catch (err) {
+                    console.error('❌ Failed to update Firestore:', err);
+                    showError('Failed to sync coins. Please try again later.');
+                    // Keep Local Storage unchanged; retry on next login
+                }
+            } else {
+                // Coins match – just ensure Local Storage is up-to-date with Firestore
+                saveToLocalStorage({
+                    uid: firestoreData.uid,
+                    displayName: firestoreData.displayName,
+                    email: firestoreData.email,
+                    photoURL: firestoreData.photoURL,
+                    coin: firestoreData.coin,
+                    createdDate: firestoreData.createdDate,
+                    createdTime: firestoreData.createdTime
+                });
+                console.log('✅ Coins match, Local Storage refreshed from Firestore.');
+            }
+        }
+
+        /**
+         * Handle a successfully authenticated Firebase user using Firestore.
+         * - If users/{uid} does not exist: create a new document with required fields.
+         * - If it exists: read the document, sync coins, and save data to Local Storage.
+         */
+        async function handleUserSignedIn(user) {
+            const uid = user.uid;
+            const displayName = user.displayName || 'User';
+            const email = user.email || '';
+            const photoURL = user.photoURL || '';
+
+            const userDocRef = doc(db, 'users', uid);
+
+            try {
+                const docSnap = await getDoc(userDocRef);
+                const exists = docSnap.exists();
+                const now = getCurrentDateAndTime();
+
+                if (!exists) {
+                    // ── FIRST LOGIN: create new user document ──
+                    const newRecord = {
+                        uid,
+                        displayName,
+                        email,
+                        photoURL,
+                        coin: 0,
+                        createdDate: now.date,
+                        createdTime: now.time,
+                        coinUpdatedDate: now.date,
+                        coinUpdatedTime: now.time
+                    };
+
+                    await setDoc(userDocRef, newRecord);
+
+                    // Save ONLY the allowed fields to Local Storage
+                    saveToLocalStorage({
+                        uid,
+                        displayName,
+                        email,
+                        photoURL,
+                        coin: 0,
+                        createdDate: now.date,
+                        createdTime: now.time
+                    });
+
+                    showSuccess(
+                        'Account Created!',
+                        'Your new Google Account is linked.'
+                    );
+                } else {
+                    // ── EXISTING USER: read document and sync coins ──
+                    const firestoreData = docSnap.data();
+
+                    // Read Local Storage
+                    const localData = readFromLocalStorage();
+
+                    // Perform coin synchronization
+                    await syncCoins(userDocRef, firestoreData, localData);
+
+                    // Show success message using Firestore displayName
+                    const name = firestoreData.displayName || displayName;
+                    showSuccess(
+                        'Welcome Back!',
+                        `Signed in successfully as ${name}.`
+                    );
+                }
+
+                // ── Start slide transition after 3 seconds ──
+                startTransition();
+
+                console.log('✅ User signed in – ready to redirect.');
+
+            } catch (err) {
+                console.warn('Firestore operation failed:', err.message);
+                // Fallback: use local data if available, otherwise create minimal data
+                const now = getCurrentDateAndTime();
+                const fallbackData = {
+                    uid,
+                    displayName,
+                    email,
+                    photoURL,
+                    coin: 0,
+                    createdDate: now.date,
+                    createdTime: now.time
+                };
+                saveToLocalStorage(fallbackData);
+                showSuccess(
+                    'Signed In',
+                    `Welcome${displayName ? ', ' + displayName : ''}!`
+                );
+                showError('Could not sync with Firestore. Using local data.');
+
+                // ── Start slide transition after 3 seconds ──
+                startTransition();
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 5b. TRANSITION AND REDIRECT
+        // ──────────────────────────────────────────────────────────────
+
+        function startTransition() {
+            if (isTransitioning) return;
+            isTransitioning = true;
+
+            // Wait 3 seconds (3000ms) before starting the slide
+            setTimeout(() => {
+                // Trigger slide-out
+                appContainer.classList.add('slide-out');
+
+                // After 500ms (transition duration), navigate
+                setTimeout(() => {
+                    window.location.href = "home.html";
+                }, 500);
+            }, 3000);
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 6. AUTH STATE LISTENER
+        // ──────────────────────────────────────────────────────────────
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in – always fetch from Firestore (or create)
+                setLoading(false); // ensure button is not disabled
+                handleUserSignedIn(user);
+            } else {
+                // User is signed out – ensure button is enabled
+                setLoading(false);
+            }
+        });
+
+        // ──────────────────────────────────────────────────────────────
+        // 7. GOOGLE SIGN-IN (with Popup)
+        // ──────────────────────────────────────────────────────────────
+
+        googleBtn.addEventListener('click', async () => {
+            clearError();
+            if (googleBtn.disabled) return;
+
+            setLoading(true);
+
+            const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+
+            try {
+                const result = await signInWithPopup(auth, provider);
+                // The onAuthStateChanged listener will handle the rest.
+            } catch (error) {
+                setLoading(false);
+                // Graceful error handling
+                switch (error.code) {
+                    case 'auth/popup-closed-by-user':
+                        showError('Sign-in cancelled. Please try again.');
+                        break;
+                    case 'auth/network-request-failed':
+                        showError('Network error. Please check your connection.');
+                        break;
+                    case 'auth/popup-blocked':
+                        showError('Popup was blocked. Please allow popups for this site.');
+                        break;
+                    case 'auth/unauthorized-domain':
+                        showError('This domain is not authorized for Firebase. Please contact support.');
+                        break;
+                    default:
+                        showError(`Authentication failed: ${error.message}`);
+                        break;
+                }
+                console.warn('Google Sign-In error:', error.code, error.message);
+            }
+        });
+
+        // ──────────────────────────────────────────────────────────────
+        // 8. RESTORE SESSION ON LOAD (optional – just show cached data)
+        // ──────────────────────────────────────────────────────────────
+
+        (function restoreSession() {
+            const stored = readFromLocalStorage();
+            if (stored && stored.uid) {
+                const currentUser = auth.currentUser;
+                if (currentUser && currentUser.uid === stored.uid) {
+                    // Already signed in and we have cached data – show success quickly
+                    // but we will also call handleUserSignedIn in onAuthStateChanged.
+                    // We can show overlay now for faster feedback.
+                    showSuccess(
+                        'Welcome Back!',
+                        `Signed in as ${stored.displayName || 'User'}.`
+                    );
+                }
+            }
+        })();
+
+        // ──────────────────────────────────────────────────────────────
+        // 9. EXPOSE KEY FUNCTIONS TO GLOBAL SCOPE (for debugging)
+        // ──────────────────────────────────────────────────────────────
+        window.__firebaseDebug = {
+            auth,
+            db,
+            getCurrentDateAndTime,
+            readFromLocalStorage,
+            handleUserSignedIn,
+            syncCoins
+        };
+
+        console.log('✅ Firebase with Cloud Firestore (coin sync) initialized successfully.');
+        console.log('ℹ️  Use __firebaseDebug for introspection.');
+    </script>
+
+</body>
+</html>
